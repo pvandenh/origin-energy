@@ -61,7 +61,8 @@ logged-in browser session:
 browser extension that finds both values for you and puts them in a
 copy-paste-ready popup - no DevTools required. See its own
 [README](setup-helper-extension/README.md) for load-unpacked instructions.
-<img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/afa32798-061f-4bce-bce9-92c2f2fd36ff" />
+<img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/b8b54e76-3c4b-4efb-9728-8af83b68cb19" />
+
 
 
 
