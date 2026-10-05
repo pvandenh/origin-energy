@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Home Assistant dev/test artifacts, if you ever run a local HA core checkout here
+.HA_VERSION
+config/.storage/
+config/home-assistant.log*
+config/deps/
+
+# Never commit real credentials captured during testing
+*.har
+*cookies*.txt
+*.pcap
+*.pcapng
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Packaging (if the extension is ever zipped for distribution)
+*.zip
+*.crx
+*.pem

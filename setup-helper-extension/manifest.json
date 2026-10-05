@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Origin Energy HA Setup Helper",
+  "version": "1.0",
+  "description": "Finds the two values the Origin Energy Home Assistant integration needs (auth0 cookie + account ID) so you don't have to use DevTools.",
+  "permissions": ["cookies", "webRequest", "storage"],
+  "host_permissions": [
+    "https://id.originenergy.com.au/*",
+    "https://api.rx.originenergy.com.au/*",
+    "https://www.originenergy.com.au/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.originenergy.com.au/*"],
+      "js": ["page-hook.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://www.originenergy.com.au/*"],
+      "js": ["relay.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Origin Energy HA Setup Helper"
+  }
+}

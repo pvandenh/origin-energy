@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      width: 340px;
+      padding: 12px 14px;
+      color: #1a1a1a;
+    }
+    h1 { font-size: 14px; margin: 0 0 10px; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-size: 11px; color: #666; margin-bottom: 4px; }
+    .row { display: flex; gap: 6px; }
+    input {
+      flex: 1;
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f7f7f7;
+    }
+    button {
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #f0f0f0; }
+    .status { font-size: 11px; margin-top: 2px; min-height: 14px; }
+    .ok { color: #0a7a2f; }
+    .missing { color: #a33; }
+    .hint { font-size: 11px; color: #666; margin-top: 10px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <h1>Origin Energy &rarr; Home Assistant</h1>
+
+  <div class="field">
+    <label for="account-id">Origin account ID</label>
+    <div class="row">
+      <input id="account-id" readonly>
+      <button data-copy="account-id">Copy</button>
+    </div>
+    <div class="status" id="account-id-status"></div>
+  </div>
+
+  <div class="field">
+    <label for="cookie">Auth0 session cookie</label>
+    <div class="row">
+      <input id="cookie" readonly>
+      <button data-copy="cookie">Copy</button>
+    </div>
+    <div class="status" id="cookie-status"></div>
+  </div>
+
+  <div class="hint">
+    If either field is empty: make sure you're logged in to
+    originenergy.com.au, then visit the "My Account" / billing page once
+    so a real request fires, and reopen this popup.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

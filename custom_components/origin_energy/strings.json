@@ -1,0 +1,88 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Origin Energy",
+        "description": "Easiest: install the \"Origin Energy HA Setup Helper\" browser extension from this integration's repo, log in to originenergy.com.au normally, visit the account/billing page once, then open the extension's popup and copy both values below. Manual fallback (no extension): 1) Open DevTools (F12) \u2192 Network tab \u2192 tick \"Preserve log\" \u2192 log in. 2) Filter for account-info - one request appears, shaped like energy-widgets-bff-api/<uuid>/account-info; that <uuid> is your account ID (NOT your A-XXXXXXX number). 3) In that same request's Headers \u2192 Request Headers \u2192 Cookie:, copy everything between auth0= and the next semicolon - that's the cookie value.",
+        "data": {
+          "auth0_cookie": "Auth0 session cookie value",
+          "origin_account_id": "Origin account ID (UUID)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Origin Energy",
+        "description": "Your stored Origin Energy session has expired. Log in again in a browser, then use DevTools \u2192 Network tab \u2192 filter for account-info \u2192 open that request's Headers \u2192 Request Headers \u2192 Cookie: line, and copy the value between auth0= and the next semicolon.",
+        "data": {
+          "auth0_cookie": "Auth0 session cookie value"
+        }
+      }
+    },
+    "error": {
+      "invalid_cookie": "That cookie didn't work - silent re-authentication failed. Make sure you copied the full `auth0` cookie value while logged in.",
+      "cannot_connect": "Could not reach Origin Energy's API, or the account ID was wrong."
+    },
+    "abort": {
+      "already_configured": "This Origin Energy account is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "balance": { "name": "Account balance" },
+      "bill_period_start": { "name": "Bill period start" },
+      "bill_period_end": { "name": "Bill period end" },
+      "cost_to_date": { "name": "Cost to date" },
+      "cost_per_day": { "name": "Cost per day" },
+      "predicted_bill": { "name": "Predicted bill" },
+      "account_number": { "name": "Account number" },
+      "account_state": { "name": "Account state" },
+      "move_in_date": { "name": "Move-in date" },
+      "active_product_code": { "name": "Active product code" },
+      "active_agreement_valid_to": { "name": "Active agreement valid to" },
+      "eligible_balance_for_refund": { "name": "Eligible balance for refund" },
+      "eligible_balance_for_transfer": { "name": "Eligible balance for transfer" },
+      "payment_amount": { "name": "Payment amount" },
+      "payment_frequency": { "name": "Payment frequency" },
+      "due_bills_count": { "name": "Due bills" },
+      "upcoming_bill_period_end": { "name": "Upcoming bill period end" },
+      "transaction_count": { "name": "Transaction count" },
+      "battery_level": { "name": "Battery level" },
+      "vehicle_range": { "name": "Range" },
+      "charge_status": {
+        "name": "Charge status",
+        "state": {
+          "unplugged": "Unplugged",
+          "charging": "Charging",
+          "paused": "Paused",
+          "complete": "Complete"
+        }
+      },
+      "ev_account_status": { "name": "EV account status" },
+      "target_battery_level": { "name": "Target battery level" },
+      "minimum_charge_limit": { "name": "Minimum charge limit" },
+      "maximum_charge_limit": { "name": "Maximum charge limit" },
+      "daily_consumed": { "name": "Today's consumption" },
+      "daily_feed_in": { "name": "Today's feed-in" },
+      "daily_total_cost": { "name": "Today's total cost" },
+      "daily_usage_cost": { "name": "Today's usage cost" },
+      "daily_supply_cost": { "name": "Today's supply cost" },
+      "daily_earnings": { "name": "Today's feed-in earnings" }
+    },
+    "binary_sensor": {
+      "is_smart_meter": { "name": "Smart meter" },
+      "account_closed": { "name": "Account closed" },
+      "bill_held": { "name": "Bill held" },
+      "predicted_bill_error": { "name": "Predicted bill unavailable" },
+      "at_charge_location": { "name": "At charge location" },
+      "solar_optimisation_enabled": { "name": "Solar optimisation enabled" },
+      "target_can_be_achieved": { "name": "Charge target at risk" },
+      "optimisation_pending": { "name": "Optimisation pending" },
+      "usage_costs_missing": { "name": "Today's usage costs not yet available" }
+    },
+    "time": {
+      "target_charge_time": { "name": "Target charge time" }
+    },
+    "switch": {
+      "instant_charge": { "name": "Instant charge" }
+    }
+  }
+}
