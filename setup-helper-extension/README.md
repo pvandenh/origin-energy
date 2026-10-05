@@ -11,13 +11,14 @@ unpacked.
 
 ## Install
 
-1. Download or clone this repo
+1. Download or clone this repo. save the setup-helper-extension folder somewhere accessible to your PC browser.
 2. Go to `chrome://extensions` (or the equivalent in any Chromium
    browser - Edge, Brave)
 3. Enable **Developer mode** (top right)
 4. Click **Load unpacked** and select this `setup-helper-extension/`
-   folder
+   folder wherever you have it saved
 5. Pin it to the toolbar if you like
+
 
 ## Use
 
@@ -25,11 +26,14 @@ unpacked.
 2. Click into the account/billing page once, so a real request fires
 3. Click the extension's toolbar icon
 4. Copy both values into the Home Assistant config flow
+5. <img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/8ae8eb54-e238-45a2-8f93-2b7bb90a1e72" />
+
+
 
 If a field says "not found yet": make sure you're logged in and have
 actually loaded the account/billing page since installing the
 extension - a full page reload (not just clicking between
-already-loaded tabs) is sometimes needed to trigger a fresh request.
+already-loaded tabs) is sometimes needed to trigger a fresh request (Ctrl-Shift-r)
 
 ## How it works
 
