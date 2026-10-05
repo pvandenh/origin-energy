@@ -1,7 +1,10 @@
+<img width="738" height="414" alt="image" src="https://github.com/user-attachments/assets/0e31f2cd-354f-4b02-8e4b-8644a6c4c0ea" />
+
+
 # Origin Energy (Unofficial) for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-![Validate](https://github.com/pvandenh/origin-energy/actions/workflows/validate.yml/badge.svg)
+
 
 A custom Home Assistant integration for [Origin Energy](https://www.originenergy.com.au/)
 (Australia) account, billing, and EV Power Up (EV iCharge) data.
@@ -58,6 +61,9 @@ logged-in browser session:
 browser extension that finds both values for you and puts them in a
 copy-paste-ready popup - no DevTools required. See its own
 [README](setup-helper-extension/README.md) for load-unpacked instructions.
+<img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/afa32798-061f-4bce-bce9-92c2f2fd36ff" />
+
+
 
 ### Manual fallback
 
