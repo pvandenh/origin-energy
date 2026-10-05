@@ -26,7 +26,7 @@ unpacked.
 2. Click into the account/billing page once, so a real request fires
 3. Click the extension's toolbar icon
 4. Copy both values into the Home Assistant config flow
-5. <img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/8ae8eb54-e238-45a2-8f93-2b7bb90a1e72" />
+   <img width="1716" height="483" alt="image" src="https://github.com/user-attachments/assets/8ae8eb54-e238-45a2-8f93-2b7bb90a1e72" />
 
 
 
