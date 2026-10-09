@@ -30,3 +30,10 @@ CONF_AUTH0_COOKIE = "auth0_cookie"
 CONF_ORIGIN_ACCOUNT_ID = "origin_account_id"
 
 DEFAULT_SCAN_INTERVAL_MINUTES = 15
+
+# account-info's `balance` is reported in CENTS (e.g. 1457 == $14.57), not
+# dollars, and the portal's "CR" (credit) display corresponds to the raw
+# value being positive. The sensor reports credit as positive and money
+# owed as negative. If a real debit balance ever shows the wrong way
+# round, flip this to False.
+BALANCE_RAW_POSITIVE_IS_CREDIT = True

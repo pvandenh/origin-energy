@@ -28,6 +28,14 @@
   "entity": {
     "sensor": {
       "balance": { "name": "Account balance" },
+      "balance_status": {
+        "name": "Balance status",
+        "state": {
+          "credit": "In credit",
+          "owing": "Owing",
+          "settled": "Settled"
+        }
+      },
       "bill_period_start": { "name": "Bill period start" },
       "bill_period_end": { "name": "Bill period end" },
       "cost_to_date": { "name": "Cost to date" },
