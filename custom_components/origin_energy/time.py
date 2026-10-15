@@ -36,7 +36,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     runtime = hass.data[DOMAIN][entry.entry_id]
-    coordinator = runtime.coordinator
+    coordinator = runtime.ev_coordinator
     origin_account_id = entry.data[CONF_ORIGIN_ACCOUNT_ID]
 
     def _make_vehicle_time_entities(

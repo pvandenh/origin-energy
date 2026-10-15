@@ -121,6 +121,7 @@ async def async_setup_entry(
 ) -> None:
     runtime = hass.data[DOMAIN][entry.entry_id]
     coordinator = runtime.coordinator
+    ev_coordinator = runtime.ev_coordinator
     origin_account_id = entry.data[CONF_ORIGIN_ACCOUNT_ID]
 
     async_add_entities(
@@ -134,12 +135,14 @@ async def async_setup_entry(
         vehicle_id: str,
     ) -> list[OriginEnergyVehicleBinarySensor]:
         return [
-            OriginEnergyVehicleBinarySensor(coordinator, origin_account_id, vehicle_id, d)
+            OriginEnergyVehicleBinarySensor(
+                ev_coordinator, origin_account_id, vehicle_id, d
+            )
             for d in VEHICLE_BINARY_SENSOR_DESCRIPTIONS
         ]
 
     async_add_vehicle_entities(
-        coordinator, async_add_entities, _make_vehicle_binary_sensors
+        ev_coordinator, async_add_entities, _make_vehicle_binary_sensors
     )
 
 

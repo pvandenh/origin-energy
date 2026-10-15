@@ -29,7 +29,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import BALANCE_RAW_POSITIVE_IS_CREDIT, CONF_ORIGIN_ACCOUNT_ID, DOMAIN
+from .const import CONF_ORIGIN_ACCOUNT_ID, DOMAIN
 from .entity import (
     OriginEnergyEntity,
     OriginEnergyVehicleEntity,
@@ -55,68 +55,17 @@ def _parse_date(value: str | None) -> date | None:
         return None
 
 
-def _cents_to_aud(raw: Any) -> float | None:
-    """Origin's billing figures are reported in CENTS (1457 == $14.57)."""
-    if raw is None:
-        return None
-    try:
-        return round(float(raw) / 100, 2)
-    except (TypeError, ValueError):
-        return None
-
-
-def _balance_to_aud(raw: Any) -> float | None:
-    """`balance` (cents) -> AUD, credit positive / owing negative.
-
-    Confirmed from a captured account-billing-details response: balance,
-    eligibleBalanceForRefund and eligibleBalanceForTransfer were all 1457
-    while the portal said "$14.57 in credit". So a positive raw value is
-    a credit, and the API has no separate credit/debit flag - the sign IS
-    the indicator.
-    """
-    dollars = _cents_to_aud(raw)
-    if dollars is None:
-        return None
-    return dollars if BALANCE_RAW_POSITIVE_IS_CREDIT else -dollars
-
-
-def _raw_balance(d: dict[str, Any]) -> Any:
-    """Prefer billing-details' balance (the field confirmed in a capture,
-    alongside eligibleBalanceForRefund), falling back to account-info's."""
-    value = dig(d, "billing_details", "balance")
-    return value if value is not None else dig(d, "account_info", "balance")
-
-
-def _balance_status(raw: Any) -> str | None:
-    """Plain-English credit/owing/settled state, independent of sign display."""
-    dollars = _cents_to_aud(raw)
-    if dollars is None:
-        return None
-    if dollars == 0:
-        return "settled"
-    return "credit" if dollars > 0 else "owing"
-
-
 SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
     # -- account_info --------------------------------------------------
     OriginEnergySensorDescription(
         key="balance",
         translation_key="balance",
         device_class=SensorDeviceClass.MONETARY,
-        # Currency is not returned by the API - inferred from Origin being
-        # an AU-only retailer. Value is converted from cents and signed so
-        # that positive = in credit, negative = amount owing (see
-        # _balance_to_aud).
+        # Not returned by the API - inferred from Origin being an AU-only
+        # retailer, not observed in any response.
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
-        value_fn=lambda d: _balance_to_aud(_raw_balance(d)),
-    ),
-    OriginEnergySensorDescription(
-        key="balance_status",
-        translation_key="balance_status",
-        device_class=SensorDeviceClass.ENUM,
-        options=["credit", "owing", "settled"],
-        value_fn=lambda d: _balance_status(_raw_balance(d)),
+        value_fn=lambda d: dig(d, "account_info", "balance"),
     ),
     OriginEnergySensorDescription(
         key="bill_period_start",
@@ -221,9 +170,7 @@ SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
         entity_registry_enabled_default=False,
-        value_fn=lambda d: _cents_to_aud(
-            dig(d, "billing_details", "eligibleBalanceForRefund")
-        ),
+        value_fn=lambda d: dig(d, "billing_details", "eligibleBalanceForRefund"),
     ),
     OriginEnergySensorDescription(
         key="eligible_balance_for_transfer",
@@ -232,9 +179,7 @@ SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
         entity_registry_enabled_default=False,
-        value_fn=lambda d: _cents_to_aud(
-            dig(d, "billing_details", "eligibleBalanceForTransfer")
-        ),
+        value_fn=lambda d: dig(d, "billing_details", "eligibleBalanceForTransfer"),
     ),
     # -- billing_details: payment schedule ------------------------------
     OriginEnergySensorDescription(
@@ -408,6 +353,7 @@ async def async_setup_entry(
 ) -> None:
     runtime = hass.data[DOMAIN][entry.entry_id]
     coordinator = runtime.coordinator
+    ev_coordinator = runtime.ev_coordinator
     origin_account_id = entry.data[CONF_ORIGIN_ACCOUNT_ID]
 
     async_add_entities(
@@ -417,11 +363,13 @@ async def async_setup_entry(
 
     def _make_vehicle_sensors(vehicle_id: str) -> list[OriginEnergyVehicleSensor]:
         return [
-            OriginEnergyVehicleSensor(coordinator, origin_account_id, vehicle_id, d)
+            OriginEnergyVehicleSensor(ev_coordinator, origin_account_id, vehicle_id, d)
             for d in VEHICLE_SENSOR_DESCRIPTIONS
         ]
 
-    async_add_vehicle_entities(coordinator, async_add_entities, _make_vehicle_sensors)
+    async_add_vehicle_entities(
+        ev_coordinator, async_add_entities, _make_vehicle_sensors
+    )
 
 
 class OriginEnergySensor(OriginEnergyEntity, SensorEntity):
