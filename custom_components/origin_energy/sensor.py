@@ -55,17 +55,67 @@ def _parse_date(value: str | None) -> date | None:
         return None
 
 
+# account-billing-details reports balance in CENTS (1815 == $18.15). A
+# positive raw value is a credit (confirmed: eligibleBalanceForRefund
+# carries the same amount, and the portal says "in credit"). The sensor
+# reports credit as positive and money owing as negative; flip this if a
+# real debit ever shows the wrong way round.
+BALANCE_RAW_POSITIVE_IS_CREDIT = True
+
+
+def _cents_to_aud(raw: Any) -> float | None:
+    """Origin's billing figures are reported in CENTS (1815 == $18.15)."""
+    if raw is None:
+        return None
+    try:
+        return round(float(raw) / 100, 2)
+    except (TypeError, ValueError):
+        return None
+
+
+def _balance_to_aud(raw: Any) -> float | None:
+    """`balance` (cents) -> AUD, credit positive / owing negative."""
+    dollars = _cents_to_aud(raw)
+    if dollars is None:
+        return None
+    return dollars if BALANCE_RAW_POSITIVE_IS_CREDIT else -dollars
+
+
+def _raw_balance(d: dict[str, Any]) -> Any:
+    """Prefer billing-details' balance (the field confirmed in a capture),
+    falling back to account-info's."""
+    value = dig(d, "billing_details", "balance")
+    return value if value is not None else dig(d, "account_info", "balance")
+
+
+def _balance_status(raw: Any) -> str | None:
+    """Plain-English credit/owing/settled state, independent of sign display."""
+    dollars = _cents_to_aud(raw)
+    if dollars is None:
+        return None
+    if dollars == 0:
+        return "settled"
+    return "credit" if dollars > 0 else "owing"
+
+
 SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
     # -- account_info --------------------------------------------------
     OriginEnergySensorDescription(
         key="balance",
         translation_key="balance",
         device_class=SensorDeviceClass.MONETARY,
-        # Not returned by the API - inferred from Origin being an AU-only
-        # retailer, not observed in any response.
+        # Currency not returned by the API - inferred from Origin being an
+        # AU-only retailer. Converted from cents; credit positive.
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
-        value_fn=lambda d: dig(d, "account_info", "balance"),
+        value_fn=lambda d: _balance_to_aud(_raw_balance(d)),
+    ),
+    OriginEnergySensorDescription(
+        key="balance_status",
+        translation_key="balance_status",
+        device_class=SensorDeviceClass.ENUM,
+        options=["credit", "owing", "settled"],
+        value_fn=lambda d: _balance_status(_raw_balance(d)),
     ),
     OriginEnergySensorDescription(
         key="bill_period_start",
@@ -170,7 +220,9 @@ SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
         entity_registry_enabled_default=False,
-        value_fn=lambda d: dig(d, "billing_details", "eligibleBalanceForRefund"),
+        value_fn=lambda d: _cents_to_aud(
+            dig(d, "billing_details", "eligibleBalanceForRefund")
+        ),
     ),
     OriginEnergySensorDescription(
         key="eligible_balance_for_transfer",
@@ -179,7 +231,9 @@ SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
         native_unit_of_measurement="AUD",
         state_class=SensorStateClass.TOTAL,
         entity_registry_enabled_default=False,
-        value_fn=lambda d: dig(d, "billing_details", "eligibleBalanceForTransfer"),
+        value_fn=lambda d: _cents_to_aud(
+            dig(d, "billing_details", "eligibleBalanceForTransfer")
+        ),
     ),
     # -- billing_details: payment schedule ------------------------------
     OriginEnergySensorDescription(
