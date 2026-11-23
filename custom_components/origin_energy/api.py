@@ -16,7 +16,7 @@ from typing import Any
 import aiohttp
 
 from .auth import OriginEnergyAuth
-from .const import API_BASE, EV_ICHARGE_BASE, GRAPHQL_URL
+from .const import API_BASE, EV_ICHARGE_BASE, GRAPHQL_URL, SPIKE_BASE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -296,6 +296,26 @@ class OriginEnergyApiClient:
         """Cancel Instant Charge, reverting to the scheduled/optimised plan."""
         url = f"{EV_ICHARGE_BASE}/vehicles/{vehicle_id}/charge-override/active"
         await self._async_write("DELETE", url)
+
+    # -- Spike (demand-response events) ----------------------------------
+    # Same-origin on www.originenergy.com.au, same Bearer token and header
+    # set as EV iCharge.
+
+    async def async_get_spike_dashboard(self) -> dict[str, Any]:
+        """Current Spike widget state: opt-in status plus the upcoming event.
+
+        Observed shape:
+            {"widgetVersion": "OPTED_IN",
+             "event": {"id": 246, "date": "Today",
+                       "startTime": "7:00pm", "endTime": "8:00pm"}}
+
+        The date/time values are Origin's own display text and are passed
+        through as-is, never parsed. The shape when no event is scheduled
+        hasn't been observed, so callers must tolerate a missing/null event.
+        """
+        return await self._async_get(
+            f"{SPIKE_BASE}/dashboard-page", headers_kind="ev"
+        )
 
     # -- internals ----------------------------------------------------------
 

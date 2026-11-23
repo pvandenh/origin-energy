@@ -334,6 +334,38 @@ SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
 )
 
 
+# Spike: Origin's own display text, passed through unparsed ("Today",
+# "7:00pm", ...). Hangs off the spike coordinator, not the account one.
+SPIKE_SENSOR_DESCRIPTIONS: tuple[OriginEnergySensorDescription, ...] = (
+    OriginEnergySensorDescription(
+        key="spike_status",
+        translation_key="spike_status",
+        value_fn=lambda d: dig(d, "dashboard", "widgetVersion"),
+    ),
+    OriginEnergySensorDescription(
+        key="spike_event_date",
+        translation_key="spike_event_date",
+        value_fn=lambda d: dig(d, "dashboard", "event", "date"),
+    ),
+    OriginEnergySensorDescription(
+        key="spike_event_start",
+        translation_key="spike_event_start",
+        value_fn=lambda d: dig(d, "dashboard", "event", "startTime"),
+    ),
+    OriginEnergySensorDescription(
+        key="spike_event_end",
+        translation_key="spike_event_end",
+        value_fn=lambda d: dig(d, "dashboard", "event", "endTime"),
+    ),
+    OriginEnergySensorDescription(
+        key="spike_event_id",
+        translation_key="spike_event_id",
+        entity_registry_enabled_default=False,  # diagnostic
+        value_fn=lambda d: dig(d, "dashboard", "event", "id"),
+    ),
+)
+
+
 @dataclass(frozen=True, kw_only=True)
 class OriginEnergyVehicleSensorDescription(SensorEntityDescription):
     """Same idea as OriginEnergySensorDescription, but value_fn takes just
@@ -408,12 +440,23 @@ async def async_setup_entry(
     runtime = hass.data[DOMAIN][entry.entry_id]
     coordinator = runtime.coordinator
     ev_coordinator = runtime.ev_coordinator
+    spike_coordinator = runtime.spike_coordinator
     origin_account_id = entry.data[CONF_ORIGIN_ACCOUNT_ID]
 
     async_add_entities(
         OriginEnergySensor(coordinator, entry.entry_id, origin_account_id, description)
         for description in SENSOR_DESCRIPTIONS
     )
+
+    # Only create Spike entities if the Spike endpoint answered on startup,
+    # so accounts that aren't on Spike don't get permanently-unavailable ones.
+    if spike_coordinator.last_update_success:
+        async_add_entities(
+            OriginEnergySensor(
+                spike_coordinator, entry.entry_id, origin_account_id, description
+            )
+            for description in SPIKE_SENSOR_DESCRIPTIONS
+        )
 
     def _make_vehicle_sensors(vehicle_id: str) -> list[OriginEnergyVehicleSensor]:
         return [

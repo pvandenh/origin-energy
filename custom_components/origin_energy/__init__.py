@@ -21,6 +21,7 @@ from .const import (
     CONF_ORIGIN_ACCOUNT_ID,
     DOMAIN,
     EV_SCAN_INTERVAL_MINUTES,
+    SPIKE_SCAN_INTERVAL_MINUTES,
 )
 from .entity import dig
 
@@ -36,6 +37,7 @@ class OriginEnergyRuntimeData:
     Two coordinators on purpose, polling at different rates:
       - coordinator:    account, billing and daily usage (slow - every few hours)
       - ev_coordinator: EV iCharge vehicles (fast - every few minutes)
+      - spike_coordinator: Spike event text (fast - every few minutes)
 
     Vehicle entities (and the writable time/switch entities) hang off
     ev_coordinator, so a time/switch write only triggers a cheap
@@ -49,6 +51,7 @@ class OriginEnergyRuntimeData:
 
     coordinator: DataUpdateCoordinator
     ev_coordinator: DataUpdateCoordinator
+    spike_coordinator: DataUpdateCoordinator
     client: OriginEnergyApiClient
 
 
@@ -135,6 +138,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         except OriginEnergyApiError as err:
             raise UpdateFailed(str(err)) from err
 
+    async def _async_update_spike_data() -> dict:
+        # Its own coordinator so a Spike failure (or an account that simply
+        # isn't on Spike) never affects billing or vehicle data.
+        try:
+            dashboard = await client.async_get_spike_dashboard()
+            _persist_rotated_cookie()
+            return {"dashboard": dashboard}
+        except OriginSessionExpired as err:
+            raise ConfigEntryAuthFailed(str(err)) from err
+        except OriginEnergyApiError as err:
+            raise UpdateFailed(str(err)) from err
+
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -152,15 +167,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(minutes=EV_SCAN_INTERVAL_MINUTES),
     )
 
+    spike_coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        config_entry=entry,
+        name=f"{DOMAIN}_spike",
+        update_method=_async_update_spike_data,
+        update_interval=timedelta(minutes=SPIKE_SCAN_INTERVAL_MINUTES),
+    )
+
     await coordinator.async_config_entry_first_refresh()
     # Deliberately NOT async_config_entry_first_refresh: an account with no
     # EV iCharge set up (or an EV-side outage) must not stop the integration
     # from loading. If this first fetch fails, vehicle entities simply start
     # unavailable/absent, and appear once a later poll succeeds.
     await ev_coordinator.async_refresh()
+    # Same reasoning: never block setup on Spike. sensor.py only creates the
+    # Spike entities if this first fetch succeeded.
+    await spike_coordinator.async_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = OriginEnergyRuntimeData(
-        coordinator=coordinator, ev_coordinator=ev_coordinator, client=client
+        coordinator=coordinator,
+        ev_coordinator=ev_coordinator,
+        spike_coordinator=spike_coordinator,
+        client=client,
     )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

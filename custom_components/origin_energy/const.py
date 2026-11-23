@@ -25,6 +25,10 @@ GRAPHQL_URL = f"{API_BASE}/v1/gateway/graphql"
 # NOT the api.rx.* gateway - same Bearer token though) ---
 EV_ICHARGE_BASE = "https://www.originenergy.com.au/ev-icharge/api/v2"
 
+# --- Spike demand-response events (same-origin on www.originenergy.com.au,
+# same Bearer token as EV iCharge) ---
+SPIKE_BASE = "https://www.originenergy.com.au/spike-v2/api/v1"
+
 # --- Config entry keys ---
 CONF_AUTH0_COOKIE = "auth0_cookie"
 CONF_ORIGIN_ACCOUNT_ID = "origin_account_id"
@@ -34,3 +38,4 @@ CONF_ORIGIN_ACCOUNT_ID = "origin_account_id"
 # charge state is worth keeping fresh.
 ACCOUNT_SCAN_INTERVAL_HOURS = 6
 EV_SCAN_INTERVAL_MINUTES = 5
+SPIKE_SCAN_INTERVAL_MINUTES = 5
