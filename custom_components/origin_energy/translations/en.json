@@ -73,7 +73,12 @@
       "daily_total_cost": { "name": "Today's total cost" },
       "daily_usage_cost": { "name": "Today's usage cost" },
       "daily_supply_cost": { "name": "Today's supply cost" },
-      "daily_earnings": { "name": "Today's feed-in earnings" }
+      "daily_earnings": { "name": "Today's feed-in earnings" },
+      "spike_status": { "name": "Spike status" },
+      "spike_event_date": { "name": "Spike event date" },
+      "spike_event_start": { "name": "Spike event start" },
+      "spike_event_end": { "name": "Spike event end" },
+      "spike_event_id": { "name": "Spike event ID" }
     },
     "binary_sensor": {
       "is_smart_meter": { "name": "Smart meter" },
